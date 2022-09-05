@@ -19,10 +19,20 @@ namespace Lab1_Tracer_.Core
 
             List<string> framePath = CreateFramePath(stackTrace.GetFrames());
 
-            var method = stackTrace.GetFrame(1).GetMethod();
+            // Get method to measure
+            MethodBase? method = null;
+            StackFrame? frame = stackTrace.GetFrame(1);
+            if (frame != null)
+            {
+                method = frame.GetMethod();
+            }
 
-            ThreadTrace threadTrace = _traceResult.GetThreadTrace(Thread.CurrentThread.ManagedThreadId);
-            threadTrace.AddMethod(method.Name, method.DeclaringType.Name, framePath);
+            if (method != null)
+            {
+                string className = method.DeclaringType == null ? String.Empty : method.DeclaringType.Name;
+                ThreadTrace threadTrace = _traceResult.GetThreadTrace(Thread.CurrentThread.ManagedThreadId);
+                threadTrace.AddMethod(method.Name, className, framePath);
+            }
         }
 
         // Stop method tracing
@@ -32,10 +42,20 @@ namespace Lab1_Tracer_.Core
 
             List<string> framePath = CreateFramePath(stackTrace.GetFrames());
 
-            var method = stackTrace.GetFrame(1).GetMethod();
+            // Get method to measure
+            MethodBase? method = null;
+            StackFrame? frame = stackTrace.GetFrame(1);
+            if (frame != null)
+            {
+                method = frame.GetMethod();
+            }
 
-            ThreadTrace threadTrace = _traceResult.GetThreadTrace(Thread.CurrentThread.ManagedThreadId);
-            threadTrace.StopMethod(method.Name, method.DeclaringType.Name, framePath);
+            if (method != null)
+            {
+                string className = method.DeclaringType == null ? String.Empty : method.DeclaringType.Name;
+                ThreadTrace threadTrace = _traceResult.GetThreadTrace(Thread.CurrentThread.ManagedThreadId);
+                threadTrace.StopMethod(method.Name, className, framePath);
+            }
         }
 
         // Get trace result by threads
