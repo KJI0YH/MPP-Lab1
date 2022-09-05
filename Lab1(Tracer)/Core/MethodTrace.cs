@@ -1,5 +1,4 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 
 namespace Lab1_Tracer_.Core
 {
@@ -12,11 +11,13 @@ namespace Lab1_Tracer_.Core
         public List<MethodTrace> InnerMethods = new List<MethodTrace>();
 
         private Stopwatch _stopwatch = new Stopwatch();
+        public readonly string ParentMethod;
 
-        public MethodTrace(string name, string @class)
+        public MethodTrace(string name, string @class, string parentMethod)
         {
             Name = name;
             Class = @class;
+            ParentMethod = parentMethod;
             _stopwatch.Start();
         }
 

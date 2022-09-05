@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Lab1_Tracer_.Core
+﻿namespace Lab1_Tracer_.Core
 {
     public class ThreadTrace
     {
@@ -17,15 +11,55 @@ namespace Lab1_Tracer_.Core
             ThreadID = threadID;
         }
 
-        public void AddMethod(string name, string @class)
+        public void AddMethod(string name, string @class, List<string> framePath)
         {
-            Methods.Add(new MethodTrace(name, @class));
+            MethodTrace? method = FindMethod(framePath, name);
+
+            if (method != null)
+            {
+                method.InnerMethods.Add(new MethodTrace(name, @class, method.Name));
+            }
+            else
+            {
+                Methods.Add(new MethodTrace(name, @class, framePath[0]));
+            }
         }
 
-        public void StopMethod(string name, string @class)
+        public void StopMethod(string name, string @class, List<string> framePath)
         {
-            MethodTrace method = Methods.Find(item => item.Name == name && item.Class == @class);
-            method.TimeMeasure();
+            MethodTrace? method = FindMethod(framePath, name);
+            if (method != null)
+            {
+                method.TimeMeasure();
+            }
+
+        }
+
+        private MethodTrace? FindMethod(List<string> framePath, string methodName)
+        {
+            List<MethodTrace> methods = Methods;
+
+            List<string>.Enumerator enumerator = framePath.GetEnumerator();
+            enumerator.MoveNext();
+
+            MethodTrace? method = null;
+            MethodTrace? parent = null;
+
+            foreach (string path in framePath)
+            {
+                parent = methods.Find(item => item.ParentMethod == path);
+
+                if (parent != null)
+                {
+                    methods = parent.InnerMethods;
+                    method = parent;
+                }
+                if (method != null && method.Name == methodName)
+                {
+                    return method;
+                }
+            }
+            return method;
         }
     }
 }

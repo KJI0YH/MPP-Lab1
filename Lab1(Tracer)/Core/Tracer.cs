@@ -15,24 +15,40 @@ namespace Lab1_Tracer_.Core
         {
             StackTrace stackTrace = new StackTrace();
 
+            StackFrame[] frames = stackTrace.GetFrames();
+            List<string> framePath = new List<string>();
+
+            for (int i = frames.Length - 1; i > 0; i--)
+            {
+                framePath.Add(frames[i].GetMethod().Name);
+            }
+
             var method = stackTrace.GetFrame(1).GetMethod();
             string methodName = method.Name;
             string className = method.DeclaringType.Name;
 
             ThreadTrace threadTrace = _traceResult.GetThreadTrace(Thread.CurrentThread.ManagedThreadId);
-            threadTrace.AddMethod(methodName, className);
+            threadTrace.AddMethod(methodName, className, framePath);
         }
 
         public void StopTrace()
         {
             StackTrace stackTrace = new StackTrace();
 
+            StackFrame[] frames = stackTrace.GetFrames();
+            List<string> framePath = new List<string>();
+
+            for (int i = frames.Length - 1; i > 0; i--)
+            {
+                framePath.Add(frames[i].GetMethod().Name);
+            }
+
             var method = stackTrace.GetFrame(1).GetMethod();
             string methodName = method.Name;
             string className = method.DeclaringType.Name;
 
             ThreadTrace threadTrace = _traceResult.GetThreadTrace(Thread.CurrentThread.ManagedThreadId);
-            threadTrace.StopMethod(methodName, className);
+            threadTrace.StopMethod(methodName, className, framePath);
         }
 
         public TraceResult GetTraceResult()

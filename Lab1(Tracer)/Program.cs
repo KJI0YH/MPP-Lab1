@@ -1,41 +1,56 @@
 ﻿
 using Lab1_Tracer_.Core;
 
-public class C
+public class Foo
 {
+    private Bar _bar;
     private ITracer _tracer;
 
-    public C(ITracer tracer)
+    internal Foo(ITracer tracer)
     {
         _tracer = tracer;
+        _bar = new Bar(_tracer);
     }
 
-    public void M0()
-    {
-        M1();
-        M2();
-    }
-
-    private void M1()
+    public void MyMethod()
     {
         _tracer.StartTrace();
         Thread.Sleep(100);
-        _tracer.StopTrace();
-    }
-
-    private void M2()
-    {
-        _tracer.StartTrace();
-        Thread.Sleep(200);
+        _bar.InnerMethod();
         _tracer.StopTrace();
     }
 
     public static void Main()
     {
-        C c = new C(new Tracer());
-        c.M0();
-        
-        TraceResult tr = c._tracer.GetTraceResult();
+        Tracer tracer = new Tracer();
+        Foo foo = new Foo(tracer);
+        foo.MyMethod();
 
+        TraceResult tr = foo._tracer.GetTraceResult();
+    }
+}
+
+public class Bar
+{
+    private ITracer _tracer;
+
+    internal Bar(ITracer tracer)
+    {
+        _tracer = tracer;
+    }
+
+    public void InnerMethod()
+    {
+        _tracer.StartTrace();
+        Thread.Sleep(200);
+        MegaInner();
+        _tracer.StopTrace();
+    }
+
+    public void MegaInner()
+    {
+        _tracer.StartTrace();
+        Thread.Sleep(300);
+        _tracer.StopTrace();
     }
 }
