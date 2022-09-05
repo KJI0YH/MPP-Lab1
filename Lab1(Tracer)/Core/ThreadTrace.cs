@@ -11,6 +11,7 @@
             ThreadID = threadID;
         }
 
+        // Add method to thread trace
         public void AddMethod(string name, string @class, List<string> framePath)
         {
             MethodTrace? method = FindMethod(framePath, name);
@@ -25,6 +26,7 @@
             }
         }
 
+        // Stop method from thread trace
         public void StopMethod(string name, string @class, List<string> framePath)
         {
             MethodTrace? method = FindMethod(framePath, name);
@@ -35,6 +37,7 @@
 
         }
 
+        // Find method in thread trace
         private MethodTrace? FindMethod(List<string> framePath, string methodName)
         {
             List<MethodTrace> methods = Methods;

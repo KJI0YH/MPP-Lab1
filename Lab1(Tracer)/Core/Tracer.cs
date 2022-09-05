@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Reflection;
 
 namespace Lab1_Tracer_.Core
 {
@@ -11,49 +12,53 @@ namespace Lab1_Tracer_.Core
             _traceResult = new TraceResult();
         }
 
+        // Start method tracing
         public void StartTrace()
         {
             StackTrace stackTrace = new StackTrace();
 
-            StackFrame[] frames = stackTrace.GetFrames();
-            List<string> framePath = new List<string>();
-
-            for (int i = frames.Length - 1; i > 0; i--)
-            {
-                framePath.Add(frames[i].GetMethod().Name);
-            }
+            List<string> framePath = CreateFramePath(stackTrace.GetFrames());
 
             var method = stackTrace.GetFrame(1).GetMethod();
-            string methodName = method.Name;
-            string className = method.DeclaringType.Name;
 
             ThreadTrace threadTrace = _traceResult.GetThreadTrace(Thread.CurrentThread.ManagedThreadId);
-            threadTrace.AddMethod(methodName, className, framePath);
+            threadTrace.AddMethod(method.Name, method.DeclaringType.Name, framePath);
         }
 
+        // Stop method tracing
         public void StopTrace()
         {
             StackTrace stackTrace = new StackTrace();
 
-            StackFrame[] frames = stackTrace.GetFrames();
+            List<string> framePath = CreateFramePath(stackTrace.GetFrames());
+
+            var method = stackTrace.GetFrame(1).GetMethod();
+
+            ThreadTrace threadTrace = _traceResult.GetThreadTrace(Thread.CurrentThread.ManagedThreadId);
+            threadTrace.StopMethod(method.Name, method.DeclaringType.Name, framePath);
+        }
+
+        // Get trace result by threads
+        public TraceResult GetTraceResult()
+        {
+            return _traceResult;
+        }
+
+        // Creating frame path from methods
+        private List<string> CreateFramePath(StackFrame[] frames)
+        {
             List<string> framePath = new List<string>();
 
             for (int i = frames.Length - 1; i > 0; i--)
             {
-                framePath.Add(frames[i].GetMethod().Name);
+                MethodBase? methodBase = frames[i].GetMethod();
+
+                if (methodBase != null)
+                {
+                    framePath.Add(methodBase.Name);
+                }
             }
-
-            var method = stackTrace.GetFrame(1).GetMethod();
-            string methodName = method.Name;
-            string className = method.DeclaringType.Name;
-
-            ThreadTrace threadTrace = _traceResult.GetThreadTrace(Thread.CurrentThread.ManagedThreadId);
-            threadTrace.StopMethod(methodName, className, framePath);
-        }
-
-        public TraceResult GetTraceResult()
-        {
-            return _traceResult;
+            return framePath;
         }
     }
 }

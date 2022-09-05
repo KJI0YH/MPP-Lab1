@@ -21,6 +21,7 @@ namespace Lab1_Tracer_.Core
             _stopwatch.Start();
         }
 
+        // Stopping method time
         public void TimeMeasure()
         {
             _stopwatch.Stop();
