@@ -9,6 +9,7 @@
         public ThreadTrace(int threadID)
         {
             ThreadID = threadID;
+            Time = 0;
         }
 
         // Add method to thread trace
@@ -33,8 +34,11 @@
             if (method != null)
             {
                 method.TimeMeasure();
+                if (Methods.Contains(method))
+                {
+                    Time += method.Time.TotalMilliseconds;
+                }
             }
-
         }
 
         // Find method in thread trace
