@@ -1,31 +1,24 @@
-﻿using System.Diagnostics;
-
-namespace Lab1_Tracer_.Core
+﻿namespace Tracer.Core
 {
     public class MethodTrace
     {
         public string Name { get; private set; }
         public string Class { get; private set; }
         public TimeSpan Time { get; private set; }
+        public string TimeStr
+        {
+            get
+            {
+                return String.Format("{0:f0}ms", Time.TotalMilliseconds);
+            }
+        }
+        public List<MethodTrace> InnerMethods { get; private set; } = new List<MethodTrace>();
 
-        public List<MethodTrace> InnerMethods = new List<MethodTrace>();
-
-        private Stopwatch _stopwatch = new Stopwatch();
-        public readonly string ParentMethod;
-
-        public MethodTrace(string name, string @class, string parentMethod)
+        public MethodTrace(string name, string @class, TimeSpan time)
         {
             Name = name;
             Class = @class;
-            ParentMethod = parentMethod;
-            _stopwatch.Start();
-        }
-
-        // Stopping method time
-        public void TimeMeasure()
-        {
-            _stopwatch.Stop();
-            Time = _stopwatch.Elapsed;
+            Time = time;
         }
     }
 }

@@ -3,13 +3,32 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net6.0</TargetFramework>
-    <RootNamespace>Lab1_Tracer_</RootNamespace>
+    <RootNamespace>Tracer</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Serialization\Abstractions\**" />
+    <Compile Remove="Serialization\Json\**" />
+    <Compile Remove="Serialization\obj\**" />
+    <Compile Remove="Serialization\Xml\**" />
+    <Compile Remove="Serialization\Yaml\**" />
+    <EmbeddedResource Remove="Serialization\Abstractions\**" />
+    <EmbeddedResource Remove="Serialization\Json\**" />
+    <EmbeddedResource Remove="Serialization\obj\**" />
+    <EmbeddedResource Remove="Serialization\Xml\**" />
+    <EmbeddedResource Remove="Serialization\Yaml\**" />
+    <None Remove="Serialization\Abstractions\**" />
+    <None Remove="Serialization\Json\**" />
+    <None Remove="Serialization\obj\**" />
+    <None Remove="Serialization\Xml\**" />
+    <None Remove="Serialization\Yaml\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Core\Tests\" />
+    <Folder Include="Serialization\" />
   </ItemGroup>
 
 </Project>

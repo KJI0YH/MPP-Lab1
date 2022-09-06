@@ -1,15 +1,39 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Reflection;
 
-namespace Lab1_Tracer_.Core
+namespace Tracer.Core
 {
     public class Tracer : ITracer
     {
-        private readonly TraceResult _traceResult;
+        private readonly ConcurrentDictionary<int, ThreadInfo> _threads = new();
 
-        public Tracer()
+        private struct MethodInfo
         {
-            _traceResult = new TraceResult();
+            public string Name { get; set; }
+            public string ClassName { get; set; }
+            public List<string> FramePath { get; set; }
+            public Stopwatch Stopwatch { get; set; }
+
+            public MethodInfo(string name, string className, List<string> framePath, Stopwatch stopwatch)
+            {
+                Name = name;
+                ClassName = className;
+                FramePath = framePath;
+                Stopwatch = stopwatch;
+            }
+        }
+
+        private struct ThreadInfo
+        {
+            public ConcurrentStack<MethodInfo> RunningMethods { get; set; }
+            public List<MethodTrace> Methods { get; set; }
+
+            public ThreadInfo()
+            {
+                RunningMethods = new ConcurrentStack<MethodInfo>();
+                Methods = new List<MethodTrace>();
+            }
         }
 
         // Start method tracing
@@ -17,8 +41,6 @@ namespace Lab1_Tracer_.Core
         {
             StackTrace stackTrace = new StackTrace();
 
-            List<string> framePath = CreateFramePath(stackTrace.GetFrames());
-
             // Get method to measure
             MethodBase? method = null;
             StackFrame? frame = stackTrace.GetFrame(1);
@@ -29,39 +51,40 @@ namespace Lab1_Tracer_.Core
 
             if (method != null)
             {
-                string className = method.DeclaringType == null ? String.Empty : method.DeclaringType.Name;
-                ThreadTrace threadTrace = _traceResult.GetThreadTrace(Thread.CurrentThread.ManagedThreadId);
-                threadTrace.AddMethod(method.Name, className, framePath);
+                StackFrame[] stackFrames = stackTrace.GetFrames();
+                List<string> framePath = CreateFramePath(stackFrames);
+                string className = method.DeclaringType == null ? string.Empty : method.DeclaringType.Name;
+                MethodInfo methodInfo = new MethodInfo(method.Name, className, framePath, new Stopwatch());
+
+                int threadID = Thread.CurrentThread.ManagedThreadId;
+                ThreadInfo threadInfo = _threads.GetOrAdd(threadID, new ThreadInfo());
+                threadInfo.RunningMethods.Push(methodInfo);
+                methodInfo.Stopwatch.Start();
             }
         }
 
         // Stop method tracing
         public void StopTrace()
         {
-            StackTrace stackTrace = new StackTrace();
-
-            List<string> framePath = CreateFramePath(stackTrace.GetFrames());
-
-            // Get method to measure
-            MethodBase? method = null;
-            StackFrame? frame = stackTrace.GetFrame(1);
-            if (frame != null)
-            {
-                method = frame.GetMethod();
-            }
-
-            if (method != null)
-            {
-                string className = method.DeclaringType == null ? String.Empty : method.DeclaringType.Name;
-                ThreadTrace threadTrace = _traceResult.GetThreadTrace(Thread.CurrentThread.ManagedThreadId);
-                threadTrace.StopMethod(method.Name, className, framePath);
-            }
+            int threadID = Thread.CurrentThread.ManagedThreadId;
+            MethodInfo methodInfo;
+            if (!_threads[threadID].RunningMethods.TryPop(out methodInfo))
+                return;
+            methodInfo.Stopwatch.Stop();
+            _threads[threadID].Methods.Add(new MethodTrace(methodInfo.Name, methodInfo.ClassName, methodInfo.Stopwatch.Elapsed));
         }
 
         // Get trace result by threads
         public TraceResult GetTraceResult()
         {
-            return _traceResult;
+            Dictionary<int, ThreadTrace> threads = new Dictionary<int, ThreadTrace>();
+
+            foreach (var thread in _threads)
+            {
+                threads.Add(thread.Key, new ThreadTrace(thread.Key, thread.Value.Methods));
+            }
+
+            return new TraceResult(threads);
         }
 
         // Creating frame path from methods

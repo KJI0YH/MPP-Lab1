@@ -1,4 +1,4 @@
-﻿namespace Lab1_Tracer_.Core
+﻿namespace Tracer.Core
 {
     public interface ITracer
     {

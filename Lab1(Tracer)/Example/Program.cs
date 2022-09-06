@@ -1,5 +1,4 @@
-﻿
-using Lab1_Tracer_.Core;
+﻿using Tracer.Core;
 
 public class Foo
 {
@@ -22,7 +21,7 @@ public class Foo
 
     public static void Main()
     {
-        Tracer tracer = new Tracer();
+        Tracer.Core.Tracer tracer = new Tracer.Core.Tracer();
         Foo foo = new Foo(tracer);
         foo.MyMethod();
 

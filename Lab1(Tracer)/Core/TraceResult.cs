@@ -1,19 +1,12 @@
-﻿using System.Collections.Concurrent;
-
-namespace Lab1_Tracer_.Core
+﻿namespace Tracer.Core
 {
     public class TraceResult
     {
-        private ConcurrentDictionary<int, ThreadTrace> Threads = new ConcurrentDictionary<int, ThreadTrace>();
+        public IReadOnlyDictionary<int, ThreadTrace> Threads { get; }
 
-        public TraceResult()
+        public TraceResult(IReadOnlyDictionary<int, ThreadTrace> threads)
         {
-
-        }
-
-        public ThreadTrace GetThreadTrace(int threadID)
-        {
-            return Threads.GetOrAdd(threadID, new ThreadTrace(threadID));
+            Threads = threads;
         }
     }
 }

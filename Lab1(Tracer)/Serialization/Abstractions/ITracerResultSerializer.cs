@@ -1,6 +1,10 @@
-﻿namespace Lab1_Tracer_.Serialization.Abstractions
+﻿using Tracer.Core;
+
+namespace Tracer.Serialization.Abstractions
 {
-    internal interface ITracerResultSerializer
+    public interface ITracerResultSerializer
     {
+        string Format { get; }
+        void Serialize(TraceResult traceResult, Stream to);
     }
 }
