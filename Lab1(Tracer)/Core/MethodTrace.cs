@@ -5,20 +5,14 @@
         public string Name { get; private set; }
         public string Class { get; private set; }
         public TimeSpan Time { get; private set; }
-        public string TimeStr
-        {
-            get
-            {
-                return String.Format("{0:f0}ms", Time.TotalMilliseconds);
-            }
-        }
-        public List<MethodTrace> InnerMethods { get; private set; } = new List<MethodTrace>();
+        public IReadOnlyList<MethodTrace> InnerMethods { get; }
 
-        public MethodTrace(string name, string @class, TimeSpan time)
+        public MethodTrace(string name, string @class, TimeSpan time, IReadOnlyList<MethodTrace> innerMethods)
         {
             Name = name;
             Class = @class;
             Time = time;
+            InnerMethods = innerMethods;
         }
     }
 }

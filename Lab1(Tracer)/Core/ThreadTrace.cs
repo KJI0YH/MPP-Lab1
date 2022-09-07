@@ -4,13 +4,6 @@
     {
         public int ThreadID { get; private set; }
         public double Time { get; private set; }
-        public string TimeStr
-        {
-            get
-            {
-                return String.Format("{0:f0}ms", Time);
-            }
-        }
         public IReadOnlyList<MethodTrace> Methods { get; }
 
         public ThreadTrace(int threadID, IReadOnlyList<MethodTrace> methods)

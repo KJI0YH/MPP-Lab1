@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <TargetFramework>net6.0</TargetFramework>
     <RootNamespace>Tracer</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -9,26 +9,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Serialization\Abstractions\**" />
-    <Compile Remove="Serialization\Json\**" />
-    <Compile Remove="Serialization\obj\**" />
-    <Compile Remove="Serialization\Xml\**" />
-    <Compile Remove="Serialization\Yaml\**" />
-    <EmbeddedResource Remove="Serialization\Abstractions\**" />
-    <EmbeddedResource Remove="Serialization\Json\**" />
-    <EmbeddedResource Remove="Serialization\obj\**" />
-    <EmbeddedResource Remove="Serialization\Xml\**" />
-    <EmbeddedResource Remove="Serialization\Yaml\**" />
-    <None Remove="Serialization\Abstractions\**" />
-    <None Remove="Serialization\Json\**" />
-    <None Remove="Serialization\obj\**" />
-    <None Remove="Serialization\Xml\**" />
-    <None Remove="Serialization\Yaml\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Core\Tests\" />
-    <Folder Include="Serialization\" />
+    <Compile Remove="Core\Tests\**" />
+    <Compile Remove="Example\**" />
+    <Compile Remove="Serialization\**" />
+    <EmbeddedResource Remove="Core\Tests\**" />
+    <EmbeddedResource Remove="Example\**" />
+    <EmbeddedResource Remove="Serialization\**" />
+    <None Remove="Core\Tests\**" />
+    <None Remove="Example\**" />
+    <None Remove="Serialization\**" />
   </ItemGroup>
 
 </Project>

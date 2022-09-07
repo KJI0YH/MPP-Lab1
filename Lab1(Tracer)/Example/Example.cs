@@ -1,4 +1,5 @@
 ﻿using Tracer.Core;
+using Tracer.Serialization.Abstractions;
 
 public class Foo
 {
@@ -25,7 +26,14 @@ public class Foo
         Foo foo = new Foo(tracer);
         foo.MyMethod();
 
-        TraceResult tr = foo._tracer.GetTraceResult();
+        TraceResult tr = tracer.GetTraceResult();
+
+        List<ITracerResultSerializer> serializers = tracer.RefreshSerializers();
+        foreach (var serializer in serializers)
+        {
+            using var file = new FileStream($"result.{serializer.Format}", FileMode.Create);
+            serializer.Serialize(tr, file);
+        }
     }
 }
 

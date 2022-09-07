@@ -1,38 +1,41 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
+using Tracer.Serialization.Abstractions;
 
 namespace Tracer.Core
 {
     public class Tracer : ITracer
     {
         private readonly ConcurrentDictionary<int, ThreadInfo> _threads = new();
+        private List<ITracerResultSerializer> _serializers = new();
+        private string _serializerPath = "Plugins/Serializers";
 
         private struct MethodInfo
         {
             public string Name { get; set; }
             public string ClassName { get; set; }
-            public List<string> FramePath { get; set; }
             public Stopwatch Stopwatch { get; set; }
+            public List<MethodInfo> InnerMethods { get; set; }
 
-            public MethodInfo(string name, string className, List<string> framePath, Stopwatch stopwatch)
+            public MethodInfo(string name, string className, Stopwatch stopwatch)
             {
                 Name = name;
                 ClassName = className;
-                FramePath = framePath;
                 Stopwatch = stopwatch;
+                InnerMethods = new List<MethodInfo>();
             }
         }
 
         private struct ThreadInfo
         {
             public ConcurrentStack<MethodInfo> RunningMethods { get; set; }
-            public List<MethodTrace> Methods { get; set; }
+            public List<MethodInfo> RootMethods { get; set; }
 
             public ThreadInfo()
             {
                 RunningMethods = new ConcurrentStack<MethodInfo>();
-                Methods = new List<MethodTrace>();
+                RootMethods = new List<MethodInfo>();
             }
         }
 
@@ -51,13 +54,22 @@ namespace Tracer.Core
 
             if (method != null)
             {
-                StackFrame[] stackFrames = stackTrace.GetFrames();
-                List<string> framePath = CreateFramePath(stackFrames);
                 string className = method.DeclaringType == null ? string.Empty : method.DeclaringType.Name;
-                MethodInfo methodInfo = new MethodInfo(method.Name, className, framePath, new Stopwatch());
+                MethodInfo methodInfo = new MethodInfo(method.Name, className, new Stopwatch());
 
                 int threadID = Thread.CurrentThread.ManagedThreadId;
                 ThreadInfo threadInfo = _threads.GetOrAdd(threadID, new ThreadInfo());
+
+                if (threadInfo.RunningMethods.Count > 0)
+                {
+                    MethodInfo parentMethod = threadInfo.RunningMethods.First();
+                    parentMethod.InnerMethods.Add(methodInfo);
+                }
+                else
+                {
+                    threadInfo.RootMethods.Add(methodInfo);
+                }
+
                 threadInfo.RunningMethods.Push(methodInfo);
                 methodInfo.Stopwatch.Start();
             }
@@ -71,7 +83,6 @@ namespace Tracer.Core
             if (!_threads[threadID].RunningMethods.TryPop(out methodInfo))
                 return;
             methodInfo.Stopwatch.Stop();
-            _threads[threadID].Methods.Add(new MethodTrace(methodInfo.Name, methodInfo.ClassName, methodInfo.Stopwatch.Elapsed));
         }
 
         // Get trace result by threads
@@ -81,27 +92,55 @@ namespace Tracer.Core
 
             foreach (var thread in _threads)
             {
-                threads.Add(thread.Key, new ThreadTrace(thread.Key, thread.Value.Methods));
+                List<MethodTrace> methods = new List<MethodTrace>();
+                foreach (MethodInfo method in thread.Value.RootMethods)
+                {
+                    methods.Add(new MethodTrace(method.Name, method.ClassName, method.Stopwatch.Elapsed, GetInnerMethods(method)));
+                }
+                threads.Add(thread.Key, new ThreadTrace(thread.Key, methods));
             }
 
             return new TraceResult(threads);
         }
 
-        // Creating frame path from methods
-        private List<string> CreateFramePath(StackFrame[] frames)
+        public List<ITracerResultSerializer> RefreshSerializers()
         {
-            List<string> framePath = new List<string>();
+            _serializers.Clear();
 
-            for (int i = frames.Length - 1; i > 0; i--)
+            DirectoryInfo pluginDirectory = new DirectoryInfo(_serializerPath);
+            if (!pluginDirectory.Exists)
+                pluginDirectory.Create();
+
+            //берем из директории все файлы с расширением .dll      
+            var pluginFiles = Directory.GetFiles(_serializerPath, "*.dll");
+            foreach (var file in pluginFiles)
             {
-                MethodBase? methodBase = frames[i].GetMethod();
 
-                if (methodBase != null)
+                Assembly asm = Assembly.LoadFrom(file);
+
+                var types = asm.GetTypes().
+                                Where(t => t.GetInterfaces().
+                                Where(i => i.FullName == typeof(ITracerResultSerializer).FullName).Any());
+
+
+                foreach (var type in types)
                 {
-                    framePath.Add(methodBase.Name);
+                    var plugin = asm.CreateInstance(type.FullName) as ITracerResultSerializer;
+                    _serializers.Add(plugin);
                 }
             }
-            return framePath;
+            return _serializers;
+        }
+
+
+        private List<MethodTrace> GetInnerMethods(MethodInfo methodTrace)
+        {
+            List<MethodTrace> innerMethods = new List<MethodTrace>();
+            foreach (MethodInfo method in methodTrace.InnerMethods)
+            {
+                innerMethods.Add(new MethodTrace(method.Name, method.ClassName, method.Stopwatch.Elapsed, GetInnerMethods(method)));
+            }
+            return innerMethods;
         }
     }
 }
