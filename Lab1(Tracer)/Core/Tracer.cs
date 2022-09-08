@@ -1,15 +1,12 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
-using Tracer.Serialization.Abstractions;
 
 namespace Tracer.Core
 {
     public class Tracer : ITracer
     {
         private readonly ConcurrentDictionary<int, ThreadInfo> _threads = new();
-        private List<ITracerResultSerializer> _serializers = new();
-        private string _serializerPath = "Plugins/Serializers";
 
         private struct MethodInfo
         {
@@ -88,7 +85,7 @@ namespace Tracer.Core
         // Get trace result by threads
         public TraceResult GetTraceResult()
         {
-            Dictionary<int, ThreadTrace> threads = new Dictionary<int, ThreadTrace>();
+            List<ThreadTrace> threads = new List<ThreadTrace>();
 
             foreach (var thread in _threads)
             {
@@ -97,41 +94,11 @@ namespace Tracer.Core
                 {
                     methods.Add(new MethodTrace(method.Name, method.ClassName, method.Stopwatch.Elapsed, GetInnerMethods(method)));
                 }
-                threads.Add(thread.Key, new ThreadTrace(thread.Key, methods));
+                threads.Add(new ThreadTrace(thread.Key, methods));
             }
 
             return new TraceResult(threads);
         }
-
-        public List<ITracerResultSerializer> RefreshSerializers()
-        {
-            _serializers.Clear();
-
-            DirectoryInfo pluginDirectory = new DirectoryInfo(_serializerPath);
-            if (!pluginDirectory.Exists)
-                pluginDirectory.Create();
-
-            //берем из директории все файлы с расширением .dll      
-            var pluginFiles = Directory.GetFiles(_serializerPath, "*.dll");
-            foreach (var file in pluginFiles)
-            {
-
-                Assembly asm = Assembly.LoadFrom(file);
-
-                var types = asm.GetTypes().
-                                Where(t => t.GetInterfaces().
-                                Where(i => i.FullName == typeof(ITracerResultSerializer).FullName).Any());
-
-
-                foreach (var type in types)
-                {
-                    var plugin = asm.CreateInstance(type.FullName) as ITracerResultSerializer;
-                    _serializers.Add(plugin);
-                }
-            }
-            return _serializers;
-        }
-
 
         private List<MethodTrace> GetInnerMethods(MethodInfo methodTrace)
         {

@@ -2,9 +2,9 @@
 {
     public class TraceResult
     {
-        public IReadOnlyDictionary<int, ThreadTrace> Threads { get; }
+        public IReadOnlyList<ThreadTrace> Threads { get; }
 
-        public TraceResult(IReadOnlyDictionary<int, ThreadTrace> threads)
+        public TraceResult(IReadOnlyList<ThreadTrace> threads)
         {
             Threads = threads;
         }

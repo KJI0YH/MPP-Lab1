@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Serialization\Abstractions\Abstractions.csproj" />
     <ProjectReference Include="..\Tracer.csproj" />
   </ItemGroup>
 
