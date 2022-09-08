@@ -2,100 +2,80 @@
 using System.Reflection;
 using Tracer.Core;
 
-public class Foo
+namespace Example
 {
-    private Bar _bar;
-    private ITracer _tracer;
-    private List<ITracerResultSerializer> _serializers = new List<ITracerResultSerializer>();
-    private string _serializersPath = "Plugins/Serializers";
-
-    internal Foo(ITracer tracer)
+    public class Example
     {
-        _tracer = tracer;
-        _bar = new Bar(_tracer);
+        private string _serializersPath = "Plugins/Serializers";
+        private List<ITracerResultSerializer> _serializers = new();
 
-    }
-
-    public void MyMethod()
-    {
-        _tracer.StartTrace();
-        Thread.Sleep(100);
-        _bar.InnerMethod();
-        _tracer.StopTrace();
-    }
-
-    public static void Main()
-    {
-        Tracer.Core.Tracer tracer = new Tracer.Core.Tracer();
-        Foo foo = new Foo(tracer);
-        foo.MyMethod();
-
-        TraceResult tr = tracer.GetTraceResult();
-
-        List<ITracerResultSerializer> serializers = foo.RefreshSerializers();
-        foreach (var serializer in serializers)
+        public static void Main()
         {
-            using var file = new FileStream($"result.{serializer.Format}", FileMode.Create);
-            serializer.Serialize(tr, file);
-        }
-    }
+            Example example = new Example();
+            Tracer.Core.Tracer tracer = new Tracer.Core.Tracer();
 
-    public List<ITracerResultSerializer> RefreshSerializers()
-    {
-        _serializers.Clear();
+            A a = new A(tracer);
+            B b = new B(tracer);
 
-        DirectoryInfo pluginDirectory = new DirectoryInfo(_serializersPath);
-        if (!pluginDirectory.Exists)
-            pluginDirectory.Create();
-
-        //берем из директории все файлы с расширением .dll      
-        var pluginFiles = Directory.GetFiles(_serializersPath, "*.dll");
-        foreach (var file in pluginFiles)
-        {
-
-            Assembly asm = Assembly.LoadFrom(file);
-
-            var types = asm.GetTypes().
-                            Where(t => t.GetInterfaces().
-                            Where(i => i.FullName == typeof(ITracerResultSerializer).FullName).Any());
-
-
-            foreach (var type in types)
+            var t1 = new Thread(() =>
             {
-                ITracerResultSerializer? serializer = asm.CreateInstance(type.FullName) as ITracerResultSerializer;
+                a.A0();
+                a.A2();
+            });
+            t1.Start();
 
-                if (serializer != null)
-                {
-                    _serializers.Add(serializer);
-                }
+            var t2 = new Thread(() =>
+            {
+                b.B0();
 
+            });
+            t2.Start();
+
+            t1.Join();
+            t2.Join();
+
+            TraceResult traceResult = tracer.GetTraceResult();
+
+            List<ITracerResultSerializer> serializers = example.RefreshSerializers();
+            foreach (var serializer in serializers)
+            {
+                using var file = new FileStream($"result.{serializer.Format}", FileMode.Create);
+                serializer.Serialize(traceResult, file);
             }
         }
-        return _serializers;
-    }
-}
 
-public class Bar
-{
-    private ITracer _tracer;
+        public List<ITracerResultSerializer> RefreshSerializers()
+        {
+            _serializers.Clear();
 
-    internal Bar(ITracer tracer)
-    {
-        _tracer = tracer;
-    }
+            DirectoryInfo pluginDirectory = new DirectoryInfo(_serializersPath);
+            if (!pluginDirectory.Exists)
+                pluginDirectory.Create();
 
-    public void InnerMethod()
-    {
-        _tracer.StartTrace();
-        Thread.Sleep(200);
-        MegaInner();
-        _tracer.StopTrace();
-    }
 
-    public void MegaInner()
-    {
-        _tracer.StartTrace();
-        Thread.Sleep(300);
-        _tracer.StopTrace();
+            var pluginFiles = Directory.GetFiles(_serializersPath, "*.dll");
+            foreach (var file in pluginFiles)
+            {
+
+                Assembly asm = Assembly.LoadFrom(file);
+
+                var types = asm.GetTypes().
+                                Where(t => t.GetInterfaces().
+                                Where(i => i.FullName == typeof(ITracerResultSerializer).FullName).Any());
+
+
+                foreach (var type in types)
+                {
+                    ITracerResultSerializer? serializer = asm.CreateInstance(type.FullName) as ITracerResultSerializer;
+
+                    if (serializer != null)
+                    {
+                        _serializers.Add(serializer);
+                    }
+
+                }
+            }
+            return _serializers;
+        }
     }
 }
