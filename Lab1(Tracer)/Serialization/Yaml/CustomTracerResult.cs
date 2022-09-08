@@ -2,7 +2,7 @@
 {
     public class CustomTracerResult
     {
-        public List<ThreadInfo> Threads = new();
+        public List<ThreadInfo> Threads;
 
         public CustomTracerResult(List<ThreadInfo> threads)
         {

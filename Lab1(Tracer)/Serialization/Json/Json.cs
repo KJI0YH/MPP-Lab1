@@ -21,10 +21,9 @@ public class JsonTracerResultSerializer : ITracerResultSerializer
         };
 
         List<ThreadInfo> threadsInfo = new List<ThreadInfo>();
-        List<MethodInfo> rootMethods = new List<MethodInfo>();
         foreach (ThreadTrace thread in traceResult.Threads)
         {
-            rootMethods.Clear();
+            List<MethodInfo> rootMethods = new List<MethodInfo>();
             foreach (MethodTrace method in thread.Methods)
             {
                 rootMethods.Add(new MethodInfo(method.Name, method.Class, method.Time, MethodInfo.GetInnerMethods(method)));
