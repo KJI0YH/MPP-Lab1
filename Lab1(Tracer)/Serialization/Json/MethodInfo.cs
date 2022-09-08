@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using Tracer.Core;
 
 namespace Json
 {
@@ -24,5 +25,14 @@ namespace Json
             Methods = methods;
         }
 
+        public static List<MethodInfo> GetInnerMethods(MethodTrace method)
+        {
+            List<MethodInfo> innerMethods = new List<MethodInfo>();
+            foreach (MethodTrace methodTrace in method.InnerMethods)
+            {
+                innerMethods.Add(new MethodInfo(methodTrace.Name, methodTrace.Class, methodTrace.Time, GetInnerMethods(methodTrace)));
+            }
+            return innerMethods;
+        }
     }
 }

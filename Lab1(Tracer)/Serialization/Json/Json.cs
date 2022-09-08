@@ -13,16 +13,6 @@ public class JsonTracerResultSerializer : ITracerResultSerializer
         }
     }
 
-    private List<MethodInfo> GetInnerMethods(MethodTrace method)
-    {
-        List<MethodInfo> innerMethods = new List<MethodInfo>();
-        foreach (MethodTrace methodTrace in method.InnerMethods)
-        {
-            innerMethods.Add(new MethodInfo(methodTrace.Name, methodTrace.Class, methodTrace.Time, GetInnerMethods(methodTrace)));
-        }
-        return innerMethods;
-    }
-
     public void Serialize(TraceResult traceResult, Stream to)
     {
         JsonSerializerOptions options = new JsonSerializerOptions
@@ -31,12 +21,15 @@ public class JsonTracerResultSerializer : ITracerResultSerializer
         };
 
         List<ThreadInfo> threadsInfo = new List<ThreadInfo>();
+        List<MethodInfo> rootMethods = new List<MethodInfo>();
         foreach (ThreadTrace thread in traceResult.Threads)
         {
+            rootMethods.Clear();
             foreach (MethodTrace method in thread.Methods)
             {
-                threadsInfo.Add(new ThreadInfo(thread.ThreadID, thread.Time, GetInnerMethods(method)));
+                rootMethods.Add(new MethodInfo(method.Name, method.Class, method.Time, MethodInfo.GetInnerMethods(method)));
             }
+            threadsInfo.Add(new ThreadInfo(thread.ThreadID, thread.Time, rootMethods));
         }
         CustomTracerResult customTracerResult = new CustomTracerResult(threadsInfo);
 
