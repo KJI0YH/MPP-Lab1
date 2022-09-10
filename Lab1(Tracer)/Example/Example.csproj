@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="NUnit" Version="3.13.3" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Serialization\Abstractions\Abstractions.csproj" />
     <ProjectReference Include="..\Tracer.csproj" />
   </ItemGroup>

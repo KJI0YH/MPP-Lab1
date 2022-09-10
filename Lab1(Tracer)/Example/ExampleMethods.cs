@@ -47,7 +47,7 @@ namespace Example
         public void B0()
         {
             _tracer.StartTrace();
-            Thread.Sleep(200);
+            Thread.Sleep(100);
             B1();
             B2();
             _tracer.StopTrace();
@@ -56,14 +56,14 @@ namespace Example
         public void B1()
         {
             _tracer.StartTrace();
-            Thread.Sleep(300);
+            Thread.Sleep(200);
             _tracer.StopTrace();
         }
 
         public void B2()
         {
             _tracer.StartTrace();
-            Thread.Sleep(300);
+            Thread.Sleep(200);
             _tracer.StopTrace();
         }
 

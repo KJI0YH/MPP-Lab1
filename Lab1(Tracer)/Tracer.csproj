@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
@@ -10,14 +10,21 @@
 
   <ItemGroup>
     <Compile Remove="Core\Tests\**" />
+    <Compile Remove="Core\Test\**" />
     <Compile Remove="Example\**" />
     <Compile Remove="Serialization\**" />
     <EmbeddedResource Remove="Core\Tests\**" />
+    <EmbeddedResource Remove="Core\Test\**" />
     <EmbeddedResource Remove="Example\**" />
     <EmbeddedResource Remove="Serialization\**" />
     <None Remove="Core\Tests\**" />
+    <None Remove="Core\Test\**" />
     <None Remove="Example\**" />
     <None Remove="Serialization\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NUnit" Version="3.13.3" />
   </ItemGroup>
 
 </Project>

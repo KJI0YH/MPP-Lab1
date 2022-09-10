@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Abstractions", "Lab1(Tracer
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tracer", "Lab1(Tracer)\Tracer.csproj", "{6B5472F9-7163-48FF-A26C-7EC3CC2CE2D2}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test", "Lab1(Tracer)\Core\Test\Test.csproj", "{F6D89A70-9DBE-4E03-99D5-8EE4BBF507BA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{6B5472F9-7163-48FF-A26C-7EC3CC2CE2D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6B5472F9-7163-48FF-A26C-7EC3CC2CE2D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6B5472F9-7163-48FF-A26C-7EC3CC2CE2D2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F6D89A70-9DBE-4E03-99D5-8EE4BBF507BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F6D89A70-9DBE-4E03-99D5-8EE4BBF507BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F6D89A70-9DBE-4E03-99D5-8EE4BBF507BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F6D89A70-9DBE-4E03-99D5-8EE4BBF507BA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

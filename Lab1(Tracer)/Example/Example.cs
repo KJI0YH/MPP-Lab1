@@ -20,6 +20,7 @@ namespace Example
             var t1 = new Thread(() =>
             {
                 a.A0();
+                a.A1();
                 a.A2();
             });
             t1.Start();
